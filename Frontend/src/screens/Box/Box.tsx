@@ -98,31 +98,14 @@ export const Box = (): JSX.Element => {
 
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden">
-      {/* Dark gradient background */}
+      {/* Dark solid background instead of gradient */}
       <div 
-        className="fixed inset-0 z-0" 
+        className="fixed inset-0 z-0 " 
         style={{
-          background: "linear-gradient(135deg, #1e1228 0%, #100c18 50%, #0a0814 100%)"
+          backgroundColor: "#0a0814"  
         }}
       />
       
-      {/* Purple glow in top-left corner */}
-      <div 
-        className="fixed top-0 left-0 w-[600px] h-[600px] opacity-40 z-0" 
-        style={{
-          background: "radial-gradient(circle, rgba(139, 92, 246, 0.5) 0%, rgba(91, 33, 182, 0.15) 50%, transparent 80%)",
-          filter: "blur(80px)"
-        }}
-      />
-      
-      {/* Additional subtle glow for depth */}
-      <div 
-        className="fixed bottom-0 right-0 w-[500px] h-[500px] opacity-30 z-0" 
-        style={{
-          background: "radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(29, 78, 216, 0.1) 50%, transparent 80%)",
-          filter: "blur(100px)"
-        }}
-      />
       
       <div className="relative flex w-full z-10">
         <nav className="fixed left-0 top-0 h-full w-[60px] bg-black/80 backdrop-blur-lg flex flex-col items-center py-8 z-50">
@@ -164,37 +147,38 @@ export const Box = (): JSX.Element => {
           </div>
         </nav>
 
-        {/* Main Content */}
-        <main className="flex-1 mt-7 ml-36 mr-10 px-[20px] pr-[40px] py-8 relative z-10">
-          {/* Header */}
-          <header className="mb-8">
-            <div className="flex items-center gap-2 mb-2">
-              <h1 className="text-[32px] font-[400] leading-[61px] tracking-[0%] font-power-grotesk text-white font-light">
-                EXPLORE
-              </h1>
+        <main className="flex-1 mt-7 ml-40  mr-10 px-[20px] pr-[40px] py-4 relative z-10">
+          <header className="mb-4 relative">
+            <div className="absolute -inset-x-8 -inset-y-4 bg-gradient-to-r from-purple-400/20 via-blue-400/20 to-transparent to-50% rounded-lg blur-xl"/>
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <h1 className="text-[32px] font-[400] leading-[61px] tracking-[0%] font-power-grotesk text-white">
+                  EXPLORE
+                </h1>
                 <span 
                   className="text-[32px] font-bold leading-[61px] tracking-[0%] font-power-grotesk text-white"
                 >
                   DNA
                 </span>
+              </div>
+              <p className="text-[#9CA3AF] text-sm">
+                One-of-a-kind AI music experience, powered by real artists and musicians.
+              </p>
             </div>
-            <p className="text-[#9CA3AF] text-sm">
-              One-of-a-kind AI music experience, powered by real artists and musicians.
-            </p>
           </header>
 
-          {/* Artist Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">  {/* Changed gap-6 to gap-8 */}
+          {/* Artist Grid with reduced gap */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-12">
             {artists.map((artist) => (
-              <Card
+                <Card
                 key={artist.id}
-                className="group bg-[#1A1425]/10 backdrop-blur-[2px] border-none overflow-hidden rounded-xl hover:scale-[1.02] hover:bg-[#1A1425]/40 hover:backdrop-blur-sm transition-all duration-300"
-              >
-                <div className="relative aspect-square group cursor-pointer" onClick={() => handlePlay(artist.id)}>
+                className="group bg-[#1A1425]/10 border-8 border-[#222325]/10 overflow-hidden rounded-xl hover:scale-[1.02] hover:bg-[#222325] hover:border-[#222325]/40 hover:backdrop-blur-sm transition-all duration-300"
+                >
+                <div className="relative aspect-square group cursor-pointer rounded-xl overflow-hidden" onClick={() => handlePlay(artist.id)}>
                   <img
                     src={artist.image}
                     alt={artist.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-xl"
                   />
                   {/* Play icon overlay */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -220,16 +204,16 @@ export const Box = (): JSX.Element => {
                   )}
                 </div>
 
-                <CardContent className="p-4">
-                  <h3 className="font-bold text-white mb-1">{artist.name}</h3>
-                  <p className="text-sm text-gray-400 mb-2 line-clamp-2">{artist.description}</p>
+                <CardContent className="p-2">
+                  <h3 className="font-bold text-white text-sm">{artist.name}</h3>
+                  <p className="text-xs text-gray-400 mt-0.5 mb-0.5 line-clamp-1">{artist.description}</p>
 
                   {artist.tags && (
-                    <p className="text-xs text-gray-500">{artist.tags}</p>
+                    <p className="text-[10px] text-gray-500">{artist.tags}</p>
                   )}
 
                   <Button 
-                    className="w-full mt-3 text-white border-none opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300"
+                    className="w-full mt-1.5 text-white border-none opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 rounded-full text-xs font-medium py-1"
                     style={{
                       background: "linear-gradient(to right, #9333EA, #3B82F6)"
                     }}

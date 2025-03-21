@@ -40,7 +40,7 @@ async def get_preview(artist_id: int):
         logger.error(f"Artist not found: {artist_id}")
         raise HTTPException(status_code=404, detail="Artist not found")
 
-    preview_path = "previews/hagehage.mp3"  # Fixed filename
+    preview_path = "previews/sweater_weather.mp3"  # Fixed filename
     
     try:
         # Check if file exists locally
