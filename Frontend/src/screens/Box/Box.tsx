@@ -1,17 +1,21 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
-import { Search, Home, Library, Heart, Plus } from "lucide-react";
+import { Search, Home, Library, Heart, Plus, Play, Pause } from "lucide-react";
 import Image from "next/image";
 import logo from "@/../public/DNA/Create/Logo.png";
 import type { Artist } from "@/types/artist";
+import { Howl } from 'howler';
+import { Loader } from "../../components/ui/loader";
 
 export const Box = (): JSX.Element => {
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [playingId, setPlayingId] = useState<number | null>(null);
+  const soundRef = useRef<Howl | null>(null);
 
   useEffect(() => {
     const fetchArtists = async () => {
@@ -35,15 +39,45 @@ export const Box = (): JSX.Element => {
     fetchArtists();
   }, []);
 
+  const handlePlay = (artistId: number) => {
+    // Stop currently playing sound
+    if (soundRef.current) {
+      soundRef.current.stop();
+    }
+
+    // If clicking the same artist that's playing, stop it
+    if (playingId === artistId) {
+      setPlayingId(null);
+      return;
+    }
+
+    const sound = new Howl({
+      src: [`http://localhost:8000/api/preview/${artistId}`], 
+      format: ['mp3'],
+      html5: true,
+      onend: () => {
+        setPlayingId(null);
+      },
+      onloaderror: (id, error) => {
+        console.error('Error loading audio:', error);
+      }
+    });
+
+    sound.play();
+    soundRef.current = sound;
+    setPlayingId(artistId);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.stop();
+      }
+    };
+  }, []);
+
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-white space-y-4 text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-t-purple-500 border-opacity-50 rounded-full mx-auto"></div>
-          <p>Loading artists...</p>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {
@@ -91,65 +125,58 @@ export const Box = (): JSX.Element => {
       />
       
       <div className="relative flex w-full z-10">
-        {/* Sidebar */}
-        <nav className="fixed left-0 top-0 h-full w-[72px] bg-black flex flex-col items-center py-8 z-50">
-          {/* Logo at top */}
-          <div className="w-full px-[15px] mb-8">
+        <nav className="fixed left-0 top-0 h-full w-[60px] bg-black/80 backdrop-blur-lg flex flex-col items-center py-8 z-50">
+            <div className="w-full px-3 mb-12">
             <div className="w-full aspect-square flex items-center justify-center">
               <Image 
-                src={logo} 
-                alt="Logo"
-                width={42}
-                height={42}
+              src={logo} 
+              alt="Logo"
+              width={100}
+              height={100}
+              className="hover:scale-110 transition-transform"
               />
             </div>
-          </div>
+            </div>
 
           {/* Navigation buttons */}
-          <div className="flex flex-col px-[15px] w-full">
-            <button className="w-full h-[42px] rounded-lg bg-[#2A2334] flex items-center justify-center text-white hover:bg-[#342B3D] transition-colors mb-3">
-              <Home size={18} />
-            </button>
-            <button className="w-full h-[42px] rounded-lg bg-[#2A2334] flex items-center justify-center text-white hover:bg-[#342B3D] transition-colors mb-3">
-              <Search size={18} />
-            </button>
-            <button className="w-full h-[42px] rounded-lg bg-[#2A2334] flex items-center justify-center text-white hover:bg-[#342B3D] transition-colors mb-3">
-              <Library size={18} />
-            </button>
-            <button className="w-full h-[42px] rounded-lg bg-[#2A2334] flex items-center justify-center text-white hover:bg-[#342B3D] transition-colors mb-3">
-              <Heart size={18} />
-            </button>
-            <button className="w-full h-[42px] rounded-lg bg-[#2A2334] flex items-center justify-center text-white hover:bg-[#342B3D] transition-colors">
-              <Plus size={18} />
-            </button>
+          <div className="flex flex-col -mt-6 items-center gap-5 w-full">
+            {[
+              { icon: Home, id: 'home' },
+              { icon: Search, id: 'search' },
+              { icon: Library, id: 'library' },
+              { icon: Heart, id: 'favorites' },
+              { icon: Plus, id: 'create' }
+            ].map(({ icon: Icon, id }) => (
+              <button
+                key={id}
+                className="text-gray-400 hover:text-white transition-colors hover:scale-110 duration-200"
+              >
+                <Icon size={25} />
+              </button>
+            ))}
           </div>
 
           {/* Profile icon */}
-          <div className="w-full px-[15px] mt-auto">
-            <div className="w-full aspect-square rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center">
-              <span className="text-white font-bold">A</span>
+          <div className="mt-auto mb-6">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer">
+              <span className="text-white font-medium text-sm">A</span>
             </div>
           </div>
         </nav>
 
         {/* Main Content */}
-        <main className="flex-1 ml-[122px] px-[20px] py-8 relative z-10">
+        <main className="flex-1 mt-7 ml-36 mr-10 px-[20px] pr-[40px] py-8 relative z-10">
           {/* Header */}
           <header className="mb-8">
             <div className="flex items-center gap-2 mb-2">
-              <h1 className="text-[32px] font-[400] leading-[61px] tracking-[0%] font-power-grotesk text-white">
+              <h1 className="text-[32px] font-[400] leading-[61px] tracking-[0%] font-power-grotesk text-white font-light">
                 EXPLORE
               </h1>
-              <span 
-                className="text-[32px] font-[400] leading-[61px] tracking-[0%] font-power-grotesk text-transparent bg-clip-text"
-                style={{
-                  backgroundImage: "linear-gradient(to right, #A855F7, #3B82F6)",
-                  WebkitBackgroundClip: "text",
-                  backgroundClip: "text"
-                }}
-              >
-                DNA
-              </span>
+                <span 
+                  className="text-[32px] font-bold leading-[61px] tracking-[0%] font-power-grotesk text-white"
+                >
+                  DNA
+                </span>
             </div>
             <p className="text-[#9CA3AF] text-sm">
               One-of-a-kind AI music experience, powered by real artists and musicians.
@@ -157,18 +184,28 @@ export const Box = (): JSX.Element => {
           </header>
 
           {/* Artist Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">  {/* Changed gap-6 to gap-8 */}
             {artists.map((artist) => (
               <Card
                 key={artist.id}
                 className="group bg-[#1A1425]/10 backdrop-blur-[2px] border-none overflow-hidden rounded-xl hover:scale-[1.02] hover:bg-[#1A1425]/40 hover:backdrop-blur-sm transition-all duration-300"
               >
-                <div className="relative aspect-square">
+                <div className="relative aspect-square group cursor-pointer" onClick={() => handlePlay(artist.id)}>
                   <img
                     src={artist.image}
                     alt={artist.name}
                     className="w-full h-full object-cover"
                   />
+                  {/* Play icon overlay */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                      {playingId === artist.id ? (
+                        <Pause size={24} className="text-white" />
+                      ) : (
+                        <Play size={24} className="text-white ml-1" />
+                      )}
+                    </div>
+                  </div>
                   {artist.genres && (
                     <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
                       {artist.genres.map((genre, index) => (

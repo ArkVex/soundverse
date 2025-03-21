@@ -2,13 +2,9 @@ from sqlalchemy.orm import Session
 from db import SessionLocal, engine, Base
 from models import ArtistDB
 
-# Create tables
 Base.metadata.create_all(bind=engine)
 
-# Initial data
-initial_artists = [
-    
-]
+
 
 def seed_database():
     db = SessionLocal()
